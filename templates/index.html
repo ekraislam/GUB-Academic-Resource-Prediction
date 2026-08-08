@@ -65,7 +65,7 @@
       <i class="bi bi-journal-bookmark-fill"></i>
     </div>
     <div class="kpi-details">
-      <div class="kpi-value animate-counter" data-target="{{ total_records }}">0</div>
+      <div class="kpi-value animate-counter" data-target="{{ total_records }}">{{ "{:,}".format(total_records) }}</div>
       <div class="kpi-label">Total Academic Records</div>
     </div>
   </div>
@@ -76,7 +76,7 @@
       <i class="bi bi-fire"></i>
     </div>
     <div class="kpi-details">
-      <div class="kpi-value animate-counter" data-target="{{ high_demand }}">0</div>
+      <div class="kpi-value animate-counter" data-target="{{ high_demand }}">{{ "{:,}".format(high_demand) }}</div>
       <div class="kpi-label">High Demand Courses</div>
     </div>
   </div>
@@ -87,7 +87,7 @@
       <i class="bi bi-dash-circle-fill"></i>
     </div>
     <div class="kpi-details">
-      <div class="kpi-value animate-counter" data-target="{{ medium_demand }}">0</div>
+      <div class="kpi-value animate-counter" data-target="{{ medium_demand }}">{{ "{:,}".format(medium_demand) }}</div>
       <div class="kpi-label">Medium Demand Courses</div>
     </div>
   </div>
@@ -98,7 +98,7 @@
       <i class="bi bi-check-circle-fill"></i>
     </div>
     <div class="kpi-details">
-      <div class="kpi-value animate-counter" data-target="{{ low_demand }}">0</div>
+      <div class="kpi-value animate-counter" data-target="{{ low_demand }}">{{ "{:,}".format(low_demand) }}</div>
       <div class="kpi-label">Low Demand Courses</div>
     </div>
   </div>

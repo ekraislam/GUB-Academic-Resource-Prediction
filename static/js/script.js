@@ -4,7 +4,11 @@
  * mobile drawer management, and loading state handlers.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+let appInitialized = false;
+
+const initApp = () => {
+  if (appInitialized) return;
+  appInitialized = true;
 
   // ── Mobile Sidebar Drawer Toggle ──────────────────────────────────────────
   const sidebar = document.getElementById('sidebar');
@@ -119,5 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.style.cursor = 'wait';
     });
   }
+};
 
-});
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}

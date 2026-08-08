@@ -18,6 +18,11 @@ class TestGUBApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Academic Resource', response.data)
         self.assertIn(b'Dashboard', response.data)
+        # Verify that all 4 KPI values are rendered, non-zero, and match the 5,000-record dataset
+        self.assertIn(b'5,000', response.data)
+        self.assertIn(b'463', response.data)
+        self.assertIn(b'3,672', response.data)
+        self.assertIn(b'865', response.data)
 
     def test_predict_page(self):
         response = self.client.get('/predict')

@@ -18,7 +18,7 @@ from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, send_file
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
-BASE_DIR   = Path(__file__).parent
+BASE_DIR   = Path(__file__).resolve().parent
 MODELS_DIR = BASE_DIR / "models"
 
 app = Flask(__name__)
@@ -108,38 +108,78 @@ def recommend_room(demand: str, est_enrollment: int, sections: int) -> str:
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
+def load_dataset_analytics():
+    """
+    Dynamically load analytics directly from the dataset CSV file.
+    Returns a dictionary of KPI metrics and distribution data.
+    """
+    data_path = BASE_DIR / "data" / "university_academic_resource_dataset.csv"
+    if not data_path.exists():
+        return None
+
+    try:
+        df_data = pd.read_csv(data_path)
+        total_records = len(df_data)
+        demand_counts = df_data["target_resource_demand"].value_counts().to_dict()
+
+        high_demand = int(demand_counts.get("HIGH", 0))
+        medium_demand = int(demand_counts.get("MEDIUM", 0))
+        low_demand = int(demand_counts.get("LOW", 0))
+
+        dept_grp = df_data.groupby(["department", "target_resource_demand"]).size().unstack(fill_value=0)
+        dept_demand = {dept: {col: int(val) for col, val in row.items()} for dept, row in dept_grp.iterrows()}
+
+        pop_counts = df_data["course_popularity"].value_counts().sort_index()
+        pop_dist = {int(k): int(v) for k, v in pop_counts.items()}
+
+        return {
+            "total_records": total_records,
+            "total_courses": total_records,
+            "high_demand": high_demand,
+            "medium_demand": medium_demand,
+            "low_demand": low_demand,
+            "dept_demand": dept_demand,
+            "pop_dist": pop_dist,
+        }
+    except Exception:
+        return None
+
+
 @app.route("/")
 def index():
     """Dashboard — summary statistics and interactive analytics."""
     if metadata is None:
         return render_template("index.html", ready=False)
 
-    dc = metadata.get("demand_counts", {})
-    total = sum(dc.values())
+    ds_stats = load_dataset_analytics()
+    if ds_stats:
+        total_records = ds_stats["total_records"]
+        total_courses = ds_stats["total_courses"]
+        high_demand = ds_stats["high_demand"]
+        medium_demand = ds_stats["medium_demand"]
+        low_demand = ds_stats["low_demand"]
+        dept_demand = ds_stats["dept_demand"]
+        pop_dist = ds_stats["pop_dist"]
+    else:
+        dc = metadata.get("demand_counts", {})
+        total_records = metadata.get("dataset_shape", [5000])[0]
+        high_demand = dc.get("HIGH", 0)
+        medium_demand = dc.get("MEDIUM", 0)
+        low_demand = dc.get("LOW", 0)
+        total_courses = sum(dc.values()) if sum(dc.values()) > 0 else total_records
+        dept_demand = {}
+        pop_dist = {}
+
     all_res = metadata.get("all_model_results", {})
     sorted_models = sorted(all_res.items(), key=lambda x: x[1]["f1_score"], reverse=True)
 
-    # Department demand & popularity distribution for dynamic Chart.js charts
-    dept_demand = {}
-    pop_dist = {}
-    data_path = BASE_DIR / "data" / "university_academic_resource_dataset.csv"
-    if data_path.exists():
-        try:
-            df_data = pd.read_csv(data_path)
-            dept_grp = df_data.groupby(["department", "target_resource_demand"]).size().unstack(fill_value=0)
-            dept_demand = {dept: {col: int(val) for col, val in row.items()} for dept, row in dept_grp.iterrows()}
-            pop_counts = df_data["course_popularity"].value_counts().sort_index()
-            pop_dist = {int(k): int(v) for k, v in pop_counts.items()}
-        except Exception:
-            pass
-
     ctx = {
         "ready":          True,
-        "total_courses":  total,
-        "total_records":  metadata["dataset_shape"][0],
-        "high_demand":    dc.get("HIGH", 0),
-        "medium_demand":  dc.get("MEDIUM", 0),
-        "low_demand":     dc.get("LOW", 0),
+        "total_courses":  total_courses,
+        "total_records":  total_records,
+        "high_demand":    high_demand,
+        "medium_demand":  medium_demand,
+        "low_demand":     low_demand,
         "best_model":     metadata["best_model_name"],
         "best_f1":        f"{metadata['best_model_metrics']['f1_score']:.4f}",
         "best_accuracy":  f"{metadata['best_model_metrics']['accuracy']:.4f}",
