@@ -1,194 +1,165 @@
 {% extends "base.html" %}
 
 {% block title %}Model Performance — GUB Academic AI{% endblock %}
-{% block page_title %}Model Performance{% endblock %}
+{% block breadcrumb %}Model Performance{% endblock %}
 
 {% block content %}
 
 {% if not ready %}
-<div class="empty-state">
-  <div class="empty-icon"><i class="bi bi-bar-chart-fill"></i></div>
-  <h2>No Model Data Available</h2>
-  <p>Please run the training pipeline to generate model performance data.</p>
-  <div class="code-snippet"><code>python train_model.py</code></div>
+<div class="card" style="text-align: center; padding: 4rem 2rem;">
+  <i class="bi bi-bar-chart-fill" style="font-size: 3rem; color: var(--text-muted);"></i>
+  <h2 style="margin: 1rem 0 0.5rem;">No Performance Data Available</h2>
+  <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Run `python train_model.py` to evaluate model metrics.</p>
 </div>
 {% else %}
 
-<!-- ── Best Model Highlight ───────────────────────────────────────────── -->
-<div class="best-model-hero animate-in">
-  <div class="best-icon"><i class="bi bi-trophy-fill"></i></div>
-  <div class="best-details">
-    <div class="best-label">Best Performing Model</div>
-    <div class="best-name">{{ best_model }}</div>
-    <div class="best-metrics-row">
-      <span class="bm-chip">Accuracy <strong>{{ "%.4f"|format(best_metrics.accuracy) }}</strong></span>
-      <span class="bm-chip">Precision <strong>{{ "%.4f"|format(best_metrics.precision) }}</strong></span>
-      <span class="bm-chip">Recall <strong>{{ "%.4f"|format(best_metrics.recall) }}</strong></span>
-      <span class="bm-chip bm-chip-gold">F1-Score <strong>{{ "%.4f"|format(best_metrics.f1_score) }}</strong></span>
+<!-- Page Intro Header -->
+<div style="margin-bottom: 2.25rem;">
+  <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.45rem;">
+    <div style="width: 38px; height: 38px; border-radius: var(--radius-sm); background: rgba(139, 92, 246, 0.14); color: var(--accent-purple); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+      <i class="bi bi-trophy-fill"></i>
     </div>
-    <p class="best-note">Selected automatically by highest weighted F1-score on 20% hold-out test set.</p>
+    <h1 style="font-size: 1.75rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">Model Performance</h1>
+  </div>
+  <p style="color: var(--text-muted); font-size: 0.95rem;">
+    Compare six machine learning algorithms used to predict academic resource demand.
+  </p>
+</div>
+
+<!-- ── Top 3 Ranking Cards (Podium) ───────────────────────────────────────── -->
+<div class="podium-grid">
+  {% for item in sorted_models[:3] %}
+  {% set name = item[0] %}
+  {% set metrics = item[1] %}
+  <div class="podium-card {% if loop.index == 1 %}rank-1{% endif %}">
+    <div class="podium-badge">
+      {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% else %}🥉{% endif %}
+    </div>
+    <div class="podium-title">{{ name }}</div>
+    <div class="podium-f1">{{ "%.4f"|format(metrics.f1_score) }}</div>
+    <div class="podium-tag">F1-Score | Acc: {{ "%.4f"|format(metrics.accuracy) }}</div>
+    {% if loop.index == 1 %}
+    <div style="margin-top: 0.85rem;">
+      <span style="font-size: 0.72rem; font-weight: 800; color: var(--accent-gold); background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.35); padding: 0.25rem 0.7rem; border-radius: var(--radius-full);">
+        PRODUCTION MODEL
+      </span>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ── Dynamic Model Selection Insight Panel ──────────────────────────────── -->
+<div class="ai-insight-panel" style="margin-bottom: 2.25rem;">
+  <div class="insight-icon" style="background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));">
+    <i class="bi bi-cpu-fill"></i>
+  </div>
+  <div class="insight-content">
+    <div class="insight-title" style="color: var(--accent-cyan);">Selection Insight: Why {{ best_model }}?</div>
+    <div class="insight-text">
+      <strong>{{ best_model }}</strong> achieved the highest weighted F1-score of <strong>{{ "%.4f"|format(best_metrics.f1_score) }}</strong> 
+      and accuracy of <strong>{{ "%.4f"|format(best_metrics.accuracy) }}</strong> on the hold-out test set. 
+      Logistic Regression achieved the highest weighted F1-score among the evaluated models and was selected as the production prediction model due to its optimal balance of precision ({{ "%.4f"|format(best_metrics.precision) }}) and recall ({{ "%.4f"|format(best_metrics.recall) }}).
+    </div>
   </div>
 </div>
 
-<!-- ── Metrics Table ──────────────────────────────────────────────────── -->
-<div class="card animate-in" style="--delay:0.05s">
+<!-- ── Full Comparative Metrics Table ────────────────────────────────────── -->
+<div class="card" style="margin-bottom: 2.25rem;">
   <div class="card-header">
-    <i class="bi bi-table text-blue"></i>
-    <h3>All Model Metrics</h3>
-  </div>
-  <div class="card-body p0">
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Model</th>
-            <th>
-              <span class="th-sort">Accuracy</span>
-              <div class="th-bar-header">
-                <div class="th-bar" style="background:#6C63FF"></div>
-              </div>
-            </th>
-            <th>Precision</th>
-            <th>Recall</th>
-            <th>
-              <span class="th-sort">F1-Score</span>
-              <span class="th-badge">Selection Metric</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in sorted_models %}
-          {% set name = item[0] %}
-          {% set metrics = item[1] %}
-          <tr {% if name == best_model %}class="row-best"{% endif %}>
-            <td>
-              {% if loop.index == 1 %}
-                <span class="rank-badge rank-gold">#1</span>
-              {% elif loop.index == 2 %}
-                <span class="rank-badge rank-silver">#2</span>
-              {% elif loop.index == 3 %}
-                <span class="rank-badge rank-bronze">#3</span>
-              {% else %}
-                <span class="rank-badge">#{{ loop.index }}</span>
-              {% endif %}
-            </td>
-            <td class="model-name-cell">
-              {% if name == best_model %}<i class="bi bi-trophy-fill text-gold"></i>{% endif %}
-              {{ name }}
-            </td>
-            <td>
-              <div class="metric-bar-cell">
-                <div class="metric-inline-bar">
-                  <div style="width:{{ (metrics.accuracy*100)|round }}%;background:#6C63FF"></div>
-                </div>
-                <span>{{ "%.4f"|format(metrics.accuracy) }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="metric-bar-cell">
-                <div class="metric-inline-bar">
-                  <div style="width:{{ (metrics.precision*100)|round }}%;background:#43B89C"></div>
-                </div>
-                <span>{{ "%.4f"|format(metrics.precision) }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="metric-bar-cell">
-                <div class="metric-inline-bar">
-                  <div style="width:{{ (metrics.recall*100)|round }}%;background:#F7B731"></div>
-                </div>
-                <span>{{ "%.4f"|format(metrics.recall) }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="metric-bar-cell">
-                <div class="metric-inline-bar">
-                  <div style="width:{{ (metrics.f1_score*100)|round }}%;background:#EF4444"></div>
-                </div>
-                <strong class="{% if name == best_model %}text-gold{% endif %}">
-                  {{ "%.4f"|format(metrics.f1_score) }}
-                </strong>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div>
+      <div class="card-title"><i class="bi bi-table"></i> Machine Learning Algorithm Evaluation Table</div>
+      <div class="card-subtitle">Comprehensive metrics evaluated across 6 trained classification algorithms</div>
     </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Algorithm</th>
+          <th>Accuracy</th>
+          <th>Precision</th>
+          <th>Recall</th>
+          <th>Weighted F1</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in sorted_models %}
+        {% set name = item[0] %}
+        {% set metrics = item[1] %}
+        <tr {% if name == best_model %}class="row-best-model"{% endif %}>
+          <td>
+            {% if loop.index == 1 %}<strong style="color: var(--accent-gold); font-size: 0.95rem;">🥇 #1</strong>
+            {% elif loop.index == 2 %}<strong style="color: #9CA3AF;">🥈 #2</strong>
+            {% elif loop.index == 3 %}<strong style="color: #CD7F32;">🥉 #3</strong>
+            {% else %}#{{ loop.index }}{% endif %}
+          </td>
+          <td><strong>{{ name }}</strong></td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <div style="flex: 1; height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden; min-width: 60px;">
+                <div style="height: 100%; width: {{ (metrics.accuracy * 100)|round }}%; background: var(--accent-blue);"></div>
+              </div>
+              <span>{{ "%.4f"|format(metrics.accuracy) }}</span>
+            </div>
+          </td>
+          <td>{{ "%.4f"|format(metrics.precision) }}</td>
+          <td>{{ "%.4f"|format(metrics.recall) }}</td>
+          <td>
+            <strong style="color: {% if name == best_model %}var(--accent-cyan){% else %}var(--text-main){% endif %};">
+              {{ "%.4f"|format(metrics.f1_score) }}
+            </strong>
+          </td>
+          <td>
+            {% if name == best_model %}
+            <span style="font-size: 0.72rem; font-weight: 800; color: var(--low-emerald); background: rgba(16, 185, 129, 0.16); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.2rem 0.55rem; border-radius: 4px;">BEST MODEL</span>
+            {% else %}
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Evaluated</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
-<!-- ── Radar Chart ────────────────────────────────────────────────────── -->
-<div class="row-2col">
-  <div class="card animate-in" style="--delay:0.1s">
+<!-- ── Comparative Charts ────────────────────────────────────────────────── -->
+<div class="dashboard-grid-2" style="margin-bottom: 2.25rem;">
+
+  <!-- F1 Score Comparison Chart -->
+  <div class="card">
     <div class="card-header">
-      <i class="bi bi-bar-chart-fill text-purple"></i>
-      <h3>F1-Score Comparison</h3>
+      <div class="card-title"><i class="bi bi-bar-chart-fill"></i> Weighted F1-Score Comparison</div>
     </div>
-    <div class="card-body chart-card-body">
-      <canvas id="f1Chart" height="300"></canvas>
+    <div class="chart-container">
+      <canvas id="f1Chart"></canvas>
     </div>
   </div>
 
-  <div class="card animate-in" style="--delay:0.15s">
+  <!-- Accuracy Comparison Chart -->
+  <div class="card">
     <div class="card-header">
-      <i class="bi bi-activity text-teal"></i>
-      <h3>Accuracy Comparison</h3>
+      <div class="card-title"><i class="bi bi-bar-chart-line"></i> Accuracy Comparison</div>
     </div>
-    <div class="card-body chart-card-body">
-      <canvas id="accChart" height="300"></canvas>
+    <div class="chart-container">
+      <canvas id="accChart"></canvas>
     </div>
   </div>
+
 </div>
 
-<!-- ── Plot Images ────────────────────────────────────────────────────── -->
-<div class="card animate-in" style="--delay:0.2s">
+<!-- ── Confusion Matrix Section ───────────────────────────────────────────── -->
+<div class="card">
   <div class="card-header">
-    <i class="bi bi-images text-blue"></i>
-    <h3>Generated Model Plots</h3>
+    <div class="card-title"><i class="bi bi-grid-3x3"></i> Confusion Matrix (Production Model)</div>
+    <div class="card-subtitle">Actual vs Predicted demand classification breakdown for {{ best_model }}</div>
   </div>
-  <div class="card-body">
-    <div class="plot-gallery plot-gallery-lg">
-      <div class="plot-item">
-        <img src="/plots/model_comparison.png" alt="Model Comparison"
-             onerror="this.parentElement.style.display='none'" loading="lazy">
-        <p>Model Accuracy & F1 Comparison</p>
-      </div>
-      <div class="plot-item">
-        <img src="/plots/confusion_matrix.png" alt="Confusion Matrix"
-             onerror="this.parentElement.style.display='none'" loading="lazy">
-        <p>Confusion Matrix — {{ best_model }}</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Evaluation Methodology ────────────────────────────────────────── -->
-<div class="card card-info animate-in" style="--delay:0.25s">
-  <div class="card-header">
-    <i class="bi bi-info-circle-fill text-blue"></i>
-    <h3>Evaluation Methodology</h3>
-  </div>
-  <div class="card-body">
-    <div class="info-grid">
-      <div class="info-item">
-        <h4><i class="bi bi-scissors"></i> Train/Test Split</h4>
-        <p>80% training / 20% test with stratified sampling to maintain class balance.</p>
-      </div>
-      <div class="info-item">
-        <h4><i class="bi bi-bullseye"></i> Selection Criterion</h4>
-        <p>Best model selected by highest <strong>weighted F1-score</strong>, which balances precision and recall across all three demand classes.</p>
-      </div>
-      <div class="info-item">
-        <h4><i class="bi bi-lock-fill"></i> Reproducibility</h4>
-        <p>All models use <code>random_state=42</code> for reproducible results.</p>
-      </div>
-      <div class="info-item">
-        <h4><i class="bi bi-arrow-repeat"></i> Preprocessing</h4>
-        <p>Categorical encoding (LabelEncoder) and feature scaling (StandardScaler) applied to all models consistently.</p>
-      </div>
-    </div>
+  <div style="text-align: center; padding: 1.25rem;">
+    <img src="/plots/confusion_matrix.png" alt="Confusion Matrix" style="max-width: 620px; width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-md);" loading="lazy">
   </div>
 </div>
 
@@ -202,55 +173,53 @@
 const modelNames = {{ all_results.keys() | list | tojson }};
 const f1Scores   = {{ all_results.values() | map(attribute='f1_score') | list | tojson }};
 const accScores  = {{ all_results.values() | map(attribute='accuracy') | list | tojson }};
+const bestModel  = '{{ best_model }}';
 
-// F1 bar chart
+Chart.defaults.color = '#9CA3AF';
+Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+
+// 1. F1 Bar Chart
 new Chart(document.getElementById('f1Chart'), {
   type: 'bar',
   data: {
     labels: modelNames,
     datasets: [{
-      label: 'F1-Score',
       data: f1Scores,
-      backgroundColor: modelNames.map((n, i) =>
-        n === '{{ best_model }}' ? '#F7B731' : '#6C63FF88'),
-      borderColor: '#1a1a2e',
-      borderWidth: 0,
-      borderRadius: 6,
+      backgroundColor: modelNames.map(n => n === bestModel ? '#00F0FF' : 'rgba(59, 130, 246, 0.5)'),
+      borderRadius: 4
     }]
   },
   options: {
     indexAxis: 'y',
     responsive: true,
+    maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { min: 0, max: 1, ticks: { color: '#9ca3af' }, grid: { color: '#ffffff10' } },
-      y: { ticks: { color: '#e2e8f0' }, grid: { display: false } }
+      x: { min: 0.7, max: 1.0, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+      y: { grid: { display: false } }
     }
   }
 });
 
-// Accuracy bar chart
+// 2. Accuracy Bar Chart
 new Chart(document.getElementById('accChart'), {
   type: 'bar',
   data: {
     labels: modelNames,
     datasets: [{
-      label: 'Accuracy',
       data: accScores,
-      backgroundColor: modelNames.map((n, i) =>
-        n === '{{ best_model }}' ? '#43B89C' : '#43B89C55'),
-      borderColor: '#1a1a2e',
-      borderWidth: 0,
-      borderRadius: 6,
+      backgroundColor: modelNames.map(n => n === bestModel ? '#8B5CF6' : 'rgba(99, 102, 241, 0.5)'),
+      borderRadius: 4
     }]
   },
   options: {
     indexAxis: 'y',
     responsive: true,
+    maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { min: 0, max: 1, ticks: { color: '#9ca3af' }, grid: { color: '#ffffff10' } },
-      y: { ticks: { color: '#e2e8f0' }, grid: { display: false } }
+      x: { min: 0.7, max: 1.0, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+      y: { grid: { display: false } }
     }
   }
 });

@@ -104,12 +104,38 @@ class TestGUBApp(unittest.TestCase):
     def test_about_page(self):
         response = self.client.get('/about')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'About This Project', response.data)
+        self.assertIn(b'GUB Academic AI', response.data)
         self.assertIn(b'Dataset Disclaimer', response.data)
 
     def test_plots_route(self):
         response = self.client.get('/plots/demand_distribution.png')
         self.assertEqual(response.status_code, 200)
 
+    def test_export_report_route(self):
+        form_data = {
+            "department": "CSE",
+            "course_code": "CSE401",
+            "course_type": "Theory+Lab",
+            "credit": "3",
+            "semester": "Fall",
+            "previous_enrollment": "180",
+            "previous_sections": "3",
+            "previous_pass_rate": "55",
+            "course_popularity": "9",
+            "lab_required": "1",
+            "lab_capacity": "30",
+            "room_capacity": "50",
+            "instructor_count": "2",
+            "class_duration": "90",
+            "previous_resource_usage": "90",
+            "registration_growth_rate": "30"
+        }
+        self.client.post('/predict', data=form_data, follow_redirects=True)
+        response = self.client.get('/export-report')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, 'application/pdf')
+        self.assertTrue(response.data.startswith(b'%PDF'))
+
 if __name__ == '__main__':
+
     unittest.main()

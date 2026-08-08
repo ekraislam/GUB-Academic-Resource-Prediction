@@ -1,211 +1,174 @@
 {% extends "base.html" %}
 
 {% block title %}Prediction Result — GUB Academic AI{% endblock %}
-{% block page_title %}Prediction Result{% endblock %}
+{% block breadcrumb %}Prediction Result{% endblock %}
 
 {% block content %}
 
-<!-- ── Result Hero Card ───────────────────────────────────────────────── -->
-<div class="result-hero animate-in
-  {% if demand == 'HIGH' %}result-high
-  {% elif demand == 'MEDIUM' %}result-medium
-  {% else %}result-low{% endif %}">
+<!-- ── Main Hero Prediction Result Card ───────────────────────────────────── -->
+<div class="result-hero-card {% if demand == 'HIGH' %}res-high{% elif demand == 'MEDIUM' %}res-medium{% else %}res-low{% endif %}">
+  
+  <div class="result-badge-header">
+    <div>
+      <div style="font-size: 0.76rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.65rem;">
+        AI RESOURCE DEMAND PREDICTION
+      </div>
+      <div class="demand-level-pill">
+        <i class="bi bi-{% if demand == 'HIGH' %}fire{% elif demand == 'MEDIUM' %}dash-circle-fill{% else %}check-circle-fill{% endif %}"></i>
+        <span>{{ demand }} DEMAND</span>
+      </div>
+    </div>
 
-  <div class="result-hero-left">
-    <div class="result-label">RESOURCE DEMAND</div>
-    <div class="result-demand-badge">
-      <div class="demand-pulse"></div>
-      <span class="demand-text">{{ demand }}</span>
-    </div>
-    <div class="result-sub">
-      {% if demand == 'HIGH' %}
-        <i class="bi bi-exclamation-triangle-fill"></i> Significant planning action required
-      {% elif demand == 'MEDIUM' %}
-        <i class="bi bi-info-circle-fill"></i> Monitor closely and prepare contingencies
-      {% else %}
-        <i class="bi bi-check-circle-fill"></i> Current resources are likely sufficient
-      {% endif %}
-    </div>
-    <div class="result-course-info">
-      <span class="result-course-chip">
-        <i class="bi bi-book"></i>
-        {{ form.department }} &mdash; {{ form.course_code or 'N/A' }}
-      </span>
-      <span class="result-course-chip">
-        <i class="bi bi-calendar3"></i> {{ form.semester }}
-      </span>
-    </div>
-  </div>
-
-  <div class="result-hero-right">
-    <!-- Confidence bars -->
-    <div class="confidence-section">
-      <div class="confidence-title">Model Confidence</div>
-      {% for label, pct in label_proba.items() %}
-      <div class="conf-bar-row">
-        <span class="conf-label">{{ label }}</span>
-        <div class="conf-bar-track">
-          <div class="conf-bar-fill conf-{{ label | lower }}"
-               style="width: {{ pct }}%" data-target="{{ pct }}">
+    <!-- Confidence Probability Visualizer -->
+    <div style="min-width: 260px; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1.1rem;">
+      <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+        <span>Model Confidence</span>
+        <span style="color: var(--accent-cyan); font-weight: 700;">{{ label_proba.get(demand, 100) }}%</span>
+      </div>
+      <div class="confidence-bar-group">
+        {% for label, pct in label_proba.items() %}
+        <div class="confidence-row">
+          <span class="confidence-label">{{ label }}</span>
+          <div class="confidence-track">
+            <div class="confidence-fill {% if label == 'HIGH' %}fill-high{% elif label == 'MEDIUM' %}fill-medium{% else %}fill-low{% endif %}" style="width: {{ pct }}%;"></div>
           </div>
+          <span class="confidence-pct">{{ pct }}%</span>
         </div>
-        <span class="conf-pct">{{ pct }}%</span>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
-  </div>
-</div>
-
-<!-- ── Planning Estimates ─────────────────────────────────────────────── -->
-<div class="planning-grid animate-in" style="--delay:0.1s">
-
-  <div class="planning-card">
-    <div class="plan-icon plan-blue"><i class="bi bi-people-fill"></i></div>
-    <div class="plan-body">
-      <div class="plan-value">{{ est_enrollment }}</div>
-      <div class="plan-label">Expected Enrollment</div>
-      <div class="plan-hint">students next semester</div>
     </div>
   </div>
 
-  <div class="planning-card">
-    <div class="plan-icon plan-purple"><i class="bi bi-layout-split"></i></div>
-    <div class="plan-body">
-      <div class="plan-value">{{ rec_sections }}</div>
-      <div class="plan-label">Recommended Sections</div>
-      <div class="plan-hint">~40 students per section</div>
-    </div>
-  </div>
-
-  <div class="planning-card">
-    <div class="plan-icon plan-teal"><i class="bi bi-building"></i></div>
-    <div class="plan-body">
-      <div class="plan-value">{{ rec_room }}</div>
-      <div class="plan-label">Recommended Room Capacity</div>
-      <div class="plan-hint">seats per classroom</div>
-    </div>
-  </div>
-
-  <div class="planning-card">
-    <div class="plan-icon {% if rec_lab == 'Required' %}plan-red{% else %}plan-green{% endif %}">
-      <i class="bi bi-{% if rec_lab == 'Required' %}flask-fill{% else %}dash-circle-fill{% endif %}"></i>
-    </div>
-    <div class="plan-body">
-      <div class="plan-value plan-val-sm">{{ rec_lab }}</div>
-      <div class="plan-label">Lab Requirement</div>
-      <div class="plan-hint">based on course type</div>
-    </div>
-  </div>
-
-  <div class="planning-card planning-card-wide">
-    <div class="plan-icon plan-{{ demand | lower }}-accent">
-      <i class="bi bi-flag-fill"></i>
-    </div>
-    <div class="plan-body">
-      <div class="plan-value">{{ planning_priority }}</div>
-      <div class="plan-label">Planning Priority</div>
-      <div class="plan-hint">overall resource planning urgency</div>
-    </div>
+  <!-- Course Metadata Chips -->
+  <div style="display: flex; gap: 0.85rem; flex-wrap: wrap; margin-top: 1.25rem;">
+    <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); padding: 0.4rem 0.95rem; border-radius: var(--radius-full); font-size: 0.82rem; color: var(--text-main);">
+      <i class="bi bi-buildings" style="color: var(--accent-cyan);"></i> Department: <strong>{{ form.department }}</strong>
+    </span>
+    <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); padding: 0.4rem 0.95rem; border-radius: var(--radius-full); font-size: 0.82rem; color: var(--text-main);">
+      <i class="bi bi-book" style="color: var(--accent-blue);"></i> Course: <strong>{{ form.course_code or 'N/A' }}</strong> ({{ form.course_type }})
+    </span>
+    <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); padding: 0.4rem 0.95rem; border-radius: var(--radius-full); font-size: 0.82rem; color: var(--text-main);">
+      <i class="bi bi-calendar3" style="color: var(--accent-purple);"></i> Semester: <strong>{{ form.semester }}</strong>
+    </span>
   </div>
 
 </div>
 
-<!-- ── AI Rule-Based Recommendation ──────────────────────────────────── -->
-<div class="card card-recommendation animate-in" style="--delay:0.15s">
+<!-- ── Estimated Planning Requirements Grid ───────────────────────────────── -->
+<div style="margin-bottom: 2.25rem;">
+  <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.1rem; color: #fff; display: flex; align-items: center; gap: 0.6rem;">
+    <i class="bi bi-sliders" style="color: var(--accent-cyan);"></i> Estimated Planning Requirements
+  </h3>
+
+  <div class="planning-grid-5">
+    <!-- Expected Enrollment -->
+    <div class="planning-mini-card">
+      <div class="plan-lbl">Expected Enrollment</div>
+      <div class="plan-val">{{ est_enrollment }}</div>
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Estimated student count</div>
+    </div>
+
+    <!-- Recommended Sections -->
+    <div class="planning-mini-card">
+      <div class="plan-lbl">Recommended Sections</div>
+      <div class="plan-val" style="color: var(--accent-blue);">{{ rec_sections }}</div>
+      <div style="font-size: 0.72rem; color: var(--text-muted);">~40 capacity per section</div>
+    </div>
+
+    <!-- Room Capacity -->
+    <div class="planning-mini-card">
+      <div class="plan-lbl">Room Capacity</div>
+      <div class="plan-val" style="color: var(--accent-cyan);">{{ rec_room }}</div>
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Seats per classroom</div>
+    </div>
+
+    <!-- Lab Requirement -->
+    <div class="planning-mini-card">
+      <div class="plan-lbl">Lab Facility</div>
+      <div class="plan-val" style="font-size: 1.15rem; color: {% if rec_lab == 'Required' %}var(--high-red){% else %}var(--low-emerald){% endif %};">
+        {{ rec_lab }}
+      </div>
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Based on course type</div>
+    </div>
+
+    <!-- Planning Priority -->
+    <div class="planning-mini-card">
+      <div class="plan-lbl">Planning Priority</div>
+      <div class="plan-val" style="color: {% if planning_priority == 'HIGH' %}var(--high-red){% elif planning_priority == 'MEDIUM' %}var(--medium-amber){% else %}var(--low-emerald){% endif %};">
+        {{ planning_priority }}
+      </div>
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Institutional urgency</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Rule-Based AI Recommendation Panel ─────────────────────────────────── -->
+<div class="card" style="margin-bottom: 2.25rem; border-color: rgba(139, 92, 246, 0.35);">
   <div class="card-header">
-    <i class="bi bi-robot text-purple"></i>
-    <h3>Planning Recommendation</h3>
-    <span class="badge-note">Rule-based — not a separate AI model</span>
-  </div>
-  <div class="card-body">
-    <div class="recommendation-text">
-      <i class="bi bi-quote quote-icon"></i>
-      {{ rec_note }}
+    <div class="card-title" style="color: var(--accent-purple);">
+      <i class="bi bi-robot"></i> Planning Recommendation
     </div>
+    <span style="font-size: 0.75rem; background: rgba(139, 92, 246, 0.16); color: var(--accent-purple); padding: 0.25rem 0.7rem; border-radius: var(--radius-full); font-weight: 700;">
+      Rule-Based Optimization System
+    </span>
+  </div>
+  <div style="font-size: 0.98rem; line-height: 1.65; color: var(--text-main); background: rgba(139, 92, 246, 0.06); padding: 1.35rem 1.5rem; border-radius: var(--radius-sm); border-left: 4px solid var(--accent-purple);">
+    {{ rec_note }}
   </div>
 </div>
 
-<!-- ── Input Summary ─────────────────────────────────────────────────── -->
-<div class="card animate-in" style="--delay:0.2s">
+<!-- ── Input Parameter Summary Grid ───────────────────────────────────────── -->
+<div class="card" style="margin-bottom: 2.25rem;">
   <div class="card-header">
-    <i class="bi bi-clipboard-data-fill text-teal"></i>
-    <h3>Input Summary</h3>
+    <div class="card-title"><i class="bi bi-clipboard-data"></i> Submitted Input Parameters</div>
   </div>
-  <div class="card-body">
-    <div class="input-summary-grid">
-      <div class="summary-item">
-        <span class="sum-key">Department</span>
-        <span class="sum-val">{{ form.department }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Course Code</span>
-        <span class="sum-val">{{ form.course_code or 'N/A' }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Course Type</span>
-        <span class="sum-val">{{ form.course_type }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Credits</span>
-        <span class="sum-val">{{ form.credit }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Semester</span>
-        <span class="sum-val">{{ form.semester }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Prev. Enrollment</span>
-        <span class="sum-val">{{ form.previous_enrollment }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Prev. Sections</span>
-        <span class="sum-val">{{ form.previous_sections }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Pass Rate</span>
-        <span class="sum-val">{{ form.previous_pass_rate }}%</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Popularity</span>
-        <span class="sum-val">{{ form.course_popularity }}/10</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Lab Required</span>
-        <span class="sum-val">{{ 'Yes' if form.lab_required == '1' else 'No' }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="sum-key">Growth Rate</span>
-        <span class="sum-val">{{ form.registration_growth_rate }}%</span>
-      </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.85rem;">
+    <div style="background: var(--bg-surface-elev); padding: 0.75rem 0.95rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Department</div>
+      <div style="font-weight: 700; font-size: 0.9rem; color: #fff;">{{ form.department }}</div>
+    </div>
+    <div style="background: var(--bg-surface-elev); padding: 0.75rem 0.95rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Course Type</div>
+      <div style="font-weight: 700; font-size: 0.9rem; color: #fff;">{{ form.course_type }}</div>
+    </div>
+    <div style="background: var(--bg-surface-elev); padding: 0.75rem 0.95rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Credit Hours</div>
+      <div style="font-weight: 700; font-size: 0.9rem; color: #fff;">{{ form.credit }} Credits</div>
+    </div>
+    <div style="background: var(--bg-surface-elev); padding: 0.75rem 0.95rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Prev. Enrollment</div>
+      <div style="font-weight: 700; font-size: 0.9rem; color: #fff;">{{ form.previous_enrollment }} Students</div>
+    </div>
+    <div style="background: var(--bg-surface-elev); padding: 0.75rem 0.95rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Prev. Pass Rate</div>
+      <div style="font-weight: 700; font-size: 0.9rem; color: #fff;">{{ form.previous_pass_rate }}%</div>
+    </div>
+    <div style="background: var(--bg-surface-elev); padding: 0.75rem 0.95rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Popularity Rating</div>
+      <div style="font-weight: 700; font-size: 0.9rem; color: #fff;">{{ form.course_popularity }}/10</div>
+    </div>
+    <div style="background: var(--bg-surface-elev); padding: 0.75rem 0.95rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="font-size: 0.72rem; color: var(--text-muted);">Growth Rate</div>
+      <div style="font-weight: 700; font-size: 0.9rem; color: #fff;">{{ form.registration_growth_rate }}%</div>
     </div>
   </div>
 </div>
 
-<!-- ── Actions ────────────────────────────────────────────────────────── -->
-<div class="result-actions animate-in" style="--delay:0.25s">
-  <a href="{{ url_for('predict') }}" class="btn btn-primary">
-    <i class="bi bi-arrow-repeat"></i> New Prediction
+<!-- Actions Toolbar -->
+<div style="display: flex; gap: 1.1rem; align-items: center; flex-wrap: wrap;">
+  <a href="{{ url_for('export_report') }}" class="btn btn-primary" style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); color: #fff;">
+    <i class="bi bi-file-earmark-pdf-fill"></i> ↓ Download Full PDF Report
   </a>
-  <a href="{{ url_for('index') }}" class="btn btn-outline">
-    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+  <a href="{{ url_for('predict') }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-repeat"></i> Predict Another Course
   </a>
-  <button class="btn btn-outline" onclick="window.print()">
-    <i class="bi bi-printer-fill"></i> Print Result
+  <a href="{{ url_for('index') }}" class="btn btn-secondary">
+    <i class="bi bi-grid-1x2-fill"></i> Return to Dashboard
+  </a>
+  <button class="btn btn-secondary" onclick="window.print();">
+    <i class="bi bi-printer"></i> Print Analysis Report
   </button>
 </div>
 
-{% endblock %}
 
-{% block extra_scripts %}
-<script>
-// Animate confidence bars on load
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.conf-bar-fill').forEach(bar => {
-    bar.style.width = '0%';
-    setTimeout(() => {
-      bar.style.width = bar.dataset.target + '%';
-    }, 300);
-  });
-});
-</script>
 {% endblock %}

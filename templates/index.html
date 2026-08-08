@@ -1,201 +1,236 @@
 {% extends "base.html" %}
 
 {% block title %}Dashboard — GUB Academic AI{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
 
 {% block content %}
+
 {% if not ready %}
-<!-- ── Not Trained State ─────────────────────────────────────────────── -->
-<div class="empty-state">
-  <div class="empty-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-  <h2>Model Not Trained Yet</h2>
-  <p>Please run the training pipeline first to populate the dashboard.</p>
-  <div class="code-snippet">
-    <code>python generate_dataset.py</code><br>
-    <code>python train_model.py</code>
-  </div>
+<div class="card" style="text-align: center; padding: 4rem 2rem;">
+  <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem; color: var(--medium-amber);"></i>
+  <h2 style="margin: 1rem 0 0.5rem;">ML Model Not Trained</h2>
+  <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Please execute the ML training pipeline script to initialize dashboard analytics.</p>
+  <code>python train_model.py</code>
 </div>
 {% else %}
 
-<!-- ── Hero Banner ───────────────────────────────────────────────────── -->
-<div class="hero-banner">
+<!-- ── Dashboard Hero Section ──────────────────────────────────────────────── -->
+<div class="dashboard-hero">
   <div class="hero-content">
-    <div class="hero-badge"><i class="bi bi-stars"></i> AI-Powered Planning</div>
-    <h1 class="hero-title">Academic Resource<br>Demand Prediction</h1>
-    <p class="hero-sub">Prototype System for Green University of Bangladesh &mdash; powered by Machine Learning</p>
-    <a href="{{ url_for('predict') }}" class="btn btn-primary btn-hero">
-      <i class="bi bi-lightning-charge-fill"></i> Predict Now
-    </a>
-  </div>
-  <div class="hero-visual">
-    <div class="hero-ring ring-1"></div>
-    <div class="hero-ring ring-2"></div>
-    <div class="hero-ring ring-3"></div>
-    <div class="hero-icon-center"><i class="bi bi-mortarboard-fill"></i></div>
-  </div>
-</div>
-
-<!-- ── KPI Cards ─────────────────────────────────────────────────────── -->
-<div class="kpi-grid">
-  <div class="kpi-card kpi-blue animate-in" style="--delay:0.05s">
-    <div class="kpi-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
-    <div class="kpi-body">
-      <div class="kpi-value counter" data-target="{{ total_courses }}">0</div>
-      <div class="kpi-label">Total Course Records</div>
+    <div class="hero-tag">
+      <i class="bi bi-cpu-fill"></i> AI-Powered Academic Planning
     </div>
-  </div>
-  <div class="kpi-card kpi-red animate-in" style="--delay:0.1s">
-    <div class="kpi-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-    <div class="kpi-body">
-      <div class="kpi-value counter" data-target="{{ high_demand }}">0</div>
-      <div class="kpi-label">High Demand Courses</div>
-    </div>
-  </div>
-  <div class="kpi-card kpi-yellow animate-in" style="--delay:0.15s">
-    <div class="kpi-icon"><i class="bi bi-dash-circle-fill"></i></div>
-    <div class="kpi-body">
-      <div class="kpi-value counter" data-target="{{ medium_demand }}">0</div>
-      <div class="kpi-label">Medium Demand</div>
-    </div>
-  </div>
-  <div class="kpi-card kpi-green animate-in" style="--delay:0.2s">
-    <div class="kpi-icon"><i class="bi bi-check-circle-fill"></i></div>
-    <div class="kpi-body">
-      <div class="kpi-value counter" data-target="{{ low_demand }}">0</div>
-      <div class="kpi-label">Low Demand</div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Best Model Card + Demand Doughnut ─────────────────────────────── -->
-<div class="row-2col">
-
-  <!-- Best Model -->
-  <div class="card animate-in" style="--delay:0.25s">
-    <div class="card-header">
-      <i class="bi bi-trophy-fill text-gold"></i>
-      <h3>Best ML Model</h3>
-    </div>
-    <div class="card-body">
-      <div class="best-model-name">{{ best_model }}</div>
-      <div class="metrics-grid-2">
-        <div class="metric-chip chip-blue">
-          <span class="chip-label">Accuracy</span>
-          <span class="chip-val">{{ best_accuracy }}</span>
-        </div>
-        <div class="metric-chip chip-purple">
-          <span class="chip-label">Precision</span>
-          <span class="chip-val">{{ best_precision }}</span>
-        </div>
-        <div class="metric-chip chip-teal">
-          <span class="chip-label">Recall</span>
-          <span class="chip-val">{{ best_recall }}</span>
-        </div>
-        <div class="metric-chip chip-gold">
-          <span class="chip-label">F1-Score</span>
-          <span class="chip-val">{{ best_f1 }}</span>
-        </div>
-      </div>
-      <a href="{{ url_for('model_performance') }}" class="btn btn-outline btn-sm mt-auto">
-        View All Models <i class="bi bi-arrow-right"></i>
+    <h1 class="hero-title">Predict Academic Resource Demand with AI</h1>
+    <p class="hero-description">
+      Use historical academic patterns to estimate future course resource demand and support smarter planning across Green University of Bangladesh.
+    </p>
+    <div class="hero-actions">
+      <a href="{{ url_for('predict') }}" class="btn btn-primary">
+        <i class="bi bi-lightning-charge-fill"></i> Predict Demand &rarr;
+      </a>
+      <a href="{{ url_for('model_performance') }}" class="btn btn-secondary">
+        <i class="bi bi-bar-chart-fill"></i> View Model Performance
       </a>
     </div>
   </div>
 
-  <!-- Demand Distribution Doughnut -->
-  <div class="card animate-in" style="--delay:0.3s">
-    <div class="card-header">
-      <i class="bi bi-pie-chart-fill text-purple"></i>
-      <h3>Demand Distribution</h3>
+  <!-- Hero SVG Data Flow Visualization -->
+  <div class="hero-visual-nodes">
+    <svg class="node-svg" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Network Glowing Lines -->
+      <line x1="35" y1="40" x2="100" y2="85" stroke="#3B82F6" stroke-width="1.8" stroke-dasharray="4 3" opacity="0.7"/>
+      <line x1="165" y1="35" x2="100" y2="85" stroke="#00F0FF" stroke-width="1.8" opacity="0.8"/>
+      <line x1="40" y1="130" x2="100" y2="85" stroke="#10B981" stroke-width="1.8" opacity="0.7"/>
+      <line x1="165" y1="125" x2="100" y2="85" stroke="#F59E0B" stroke-width="1.8" stroke-dasharray="4 3" opacity="0.7"/>
+
+      <!-- Peripheral Nodes -->
+      <circle cx="35" cy="40" r="8" fill="#3B82F6" fill-opacity="0.7" class="pulse-node"/>
+      <circle cx="165" cy="35" r="12" fill="#00F0FF" fill-opacity="0.6" class="pulse-node"/>
+      <circle cx="40" cy="130" r="10" fill="#10B981" fill-opacity="0.6" class="pulse-node"/>
+      <circle cx="165" cy="125" r="8" fill="#F59E0B" fill-opacity="0.7" class="pulse-node"/>
+
+      <!-- Central Core Node -->
+      <circle cx="100" cy="85" r="18" fill="#8B5CF6" fill-opacity="0.8"/>
+      <circle cx="100" cy="85" r="26" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.5"/>
+      <circle cx="100" cy="85" r="5" fill="#FFFFFF"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ── KPI Cards Section ───────────────────────────────────────────────────── -->
+<div class="kpi-grid">
+  <!-- Total Academic Records -->
+  <div class="kpi-card kpi-records">
+    <div class="kpi-icon-wrapper">
+      <i class="bi bi-journal-bookmark-fill"></i>
     </div>
-    <div class="card-body chart-card-body">
-      <canvas id="demandChart" width="280" height="220"></canvas>
-      <div class="chart-legend">
-        <span class="legend-dot dot-red"></span>HIGH ({{ high_demand }})
-        <span class="legend-dot dot-yellow"></span>MEDIUM ({{ medium_demand }})
-        <span class="legend-dot dot-green"></span>LOW ({{ low_demand }})
+    <div class="kpi-details">
+      <div class="kpi-value animate-counter" data-target="{{ total_records }}">0</div>
+      <div class="kpi-label">Total Academic Records</div>
+    </div>
+  </div>
+
+  <!-- High Demand -->
+  <div class="kpi-card kpi-high">
+    <div class="kpi-icon-wrapper">
+      <i class="bi bi-fire"></i>
+    </div>
+    <div class="kpi-details">
+      <div class="kpi-value animate-counter" data-target="{{ high_demand }}">0</div>
+      <div class="kpi-label">High Demand Courses</div>
+    </div>
+  </div>
+
+  <!-- Medium Demand -->
+  <div class="kpi-card kpi-medium">
+    <div class="kpi-icon-wrapper">
+      <i class="bi bi-dash-circle-fill"></i>
+    </div>
+    <div class="kpi-details">
+      <div class="kpi-value animate-counter" data-target="{{ medium_demand }}">0</div>
+      <div class="kpi-label">Medium Demand Courses</div>
+    </div>
+  </div>
+
+  <!-- Low Demand -->
+  <div class="kpi-card kpi-low">
+    <div class="kpi-icon-wrapper">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <div class="kpi-details">
+      <div class="kpi-value animate-counter" data-target="{{ low_demand }}">0</div>
+      <div class="kpi-label">Low Demand Courses</div>
+    </div>
+  </div>
+
+  <!-- Best Model -->
+  <div class="kpi-card kpi-model">
+    <div class="kpi-icon-wrapper">
+      <i class="bi bi-trophy-fill"></i>
+    </div>
+    <div class="kpi-details">
+      <div class="kpi-value-sm">{{ best_model }}</div>
+      <div class="kpi-label">F1-Score: <strong>{{ best_f1 }}</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Dynamic AI Planning Insight Panel ──────────────────────────────────── -->
+<div class="ai-insight-panel">
+  <div class="insight-icon">
+    <i class="bi bi-lightbulb-fill"></i>
+  </div>
+  <div class="insight-content">
+    <div class="insight-title">AI Planning Insight</div>
+    <div class="insight-text">
+      Out of {{ total_records }} course offerings analyzed, <strong>{{ medium_demand }} courses ({{ "%.1f"|format(medium_demand / total_courses * 100) }}%)</strong> represent the majority of current academic demand. 
+      High-demand courses (<strong>{{ high_demand }} courses, {{ "%.1f"|format(high_demand / total_courses * 100) }}%</strong>) should receive priority during section and classroom planning. 
+      The production model (<strong>{{ best_model }}</strong>) achieves <strong>{{ "%.1f"|format(best_accuracy|float * 100) }}% overall accuracy</strong> across university records.
+    </div>
+  </div>
+</div>
+
+<!-- ── Demand Distribution & Popularity Grid ──────────────────────────────── -->
+<div class="dashboard-grid-2">
+
+  <!-- Demand Overview Doughnut -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title"><i class="bi bi-pie-chart-fill"></i> Demand Level Distribution</div>
+        <div class="card-subtitle">Overview of course resource demand requirements</div>
       </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="demandDoughnutChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Course Popularity Spectrum -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title"><i class="bi bi-bar-chart-line-fill"></i> Course Popularity Spectrum</div>
+        <div class="card-subtitle">Distribution of course popularity ratings (1 to 10 scale)</div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="popularityChart"></canvas>
     </div>
   </div>
 
 </div>
 
-<!-- ── Model Comparison Mini Table ───────────────────────────────────── -->
-<div class="card animate-in" style="--delay:0.35s">
+<!-- Department Resource Demand Chart -->
+<div class="card" style="margin-bottom: 2.25rem;">
   <div class="card-header">
-    <i class="bi bi-table text-teal"></i>
-    <h3>Model Performance Summary</h3>
-    <a href="{{ url_for('model_performance') }}" class="btn btn-outline btn-xs ml-auto">Full Report</a>
+    <div>
+      <div class="card-title"><i class="bi bi-buildings-fill"></i> Resource Demand by Academic Department</div>
+      <div class="card-subtitle">Comparison of High, Medium, and Low demand across university departments</div>
+    </div>
   </div>
-  <div class="card-body p0">
-    <div class="table-wrapper">
-      <table class="data-table">
+  <div class="chart-container" style="height: 310px;">
+    <canvas id="departmentChart"></canvas>
+  </div>
+</div>
+
+<!-- ── Model Summary & Visualizations Gallery ───────────────────────────── -->
+<div class="dashboard-grid-2">
+
+  <!-- Model Summary Table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="bi bi-table"></i> Model Performance Summary</div>
+      <a href="{{ url_for('model_performance') }}" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">Full Report &rarr;</a>
+    </div>
+    <div class="table-responsive">
+      <table class="styled-table">
         <thead>
           <tr>
-            <th>Model</th>
-            <th>Accuracy</th>
-            <th>Precision</th>
-            <th>Recall</th>
-            <th>F1-Score</th>
             <th>Rank</th>
+            <th>Algorithm</th>
+            <th>Accuracy</th>
+            <th>Weighted F1</th>
           </tr>
         </thead>
         <tbody>
           {% for item in sorted_models %}
           {% set name = item[0] %}
           {% set metrics = item[1] %}
-          <tr {% if loop.index == 1 %}class="row-best"{% endif %}>
-            <td class="model-name-cell">
-              {% if loop.index == 1 %}<i class="bi bi-trophy-fill text-gold"></i>{% endif %}
-              {{ name }}
+          <tr {% if loop.index == 1 %}class="row-best-model"{% endif %}>
+            <td>
+              {% if loop.index == 1 %}<span style="color: var(--accent-gold); font-weight: 800;">🥇 #1</span>
+              {% elif loop.index == 2 %}<span style="color: #9CA3AF; font-weight: 700;">🥈 #2</span>
+              {% elif loop.index == 3 %}<span style="color: #CD7F32; font-weight: 700;">🥉 #3</span>
+              {% else %}#{{ loop.index }}{% endif %}
             </td>
-            <td><span class="score-pill">{{ "%.4f"|format(metrics.accuracy) }}</span></td>
-            <td><span class="score-pill">{{ "%.4f"|format(metrics.precision) }}</span></td>
-            <td><span class="score-pill">{{ "%.4f"|format(metrics.recall) }}</span></td>
-            <td><span class="score-pill pill-f1">{{ "%.4f"|format(metrics.f1_score) }}</span></td>
-            <td><span class="rank-badge">#{{ loop.index }}</span></td>
+            <td><strong>{{ name }}</strong></td>
+            <td>{{ "%.4f"|format(metrics.accuracy) }}</td>
+            <td><strong style="color: var(--accent-cyan);">{{ "%.4f"|format(metrics.f1_score) }}</strong></td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-</div>
 
-<!-- ── Visualization Gallery ─────────────────────────────────────────── -->
-<div class="card animate-in" style="--delay:0.4s">
-  <div class="card-header">
-    <i class="bi bi-images text-blue"></i>
-    <h3>Generated Visualizations</h3>
-  </div>
-  <div class="card-body">
-    <div class="plot-gallery">
-      <div class="plot-item">
-        <img src="/plots/demand_distribution.png"
-             onerror="this.parentElement.style.display='none'"
-             alt="Demand Distribution" loading="lazy">
-        <p>Demand Distribution</p>
+  <!-- Generated ML Visualizations -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="bi bi-images"></i> ML Evaluation Artifacts</div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div style="background: var(--bg-surface-elev); border-radius: var(--radius-sm); overflow: hidden; padding: 0.5rem; text-align: center; border: 1px solid var(--border-subtle);">
+        <img src="/plots/model_comparison.png" alt="Model Comparison Plot" style="width: 100%; border-radius: var(--radius-xs);" loading="lazy">
+        <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; display: block; font-weight: 600;">Model Comparison Plot</span>
       </div>
-      <div class="plot-item">
-        <img src="/plots/enrollment_distribution.png"
-             onerror="this.parentElement.style.display='none'"
-             alt="Enrollment Distribution" loading="lazy">
-        <p>Enrollment Distribution</p>
-      </div>
-      <div class="plot-item">
-        <img src="/plots/model_comparison.png"
-             onerror="this.parentElement.style.display='none'"
-             alt="Model Comparison" loading="lazy">
-        <p>Model Comparison</p>
-      </div>
-      <div class="plot-item">
-        <img src="/plots/confusion_matrix.png"
-             onerror="this.parentElement.style.display='none'"
-             alt="Confusion Matrix" loading="lazy">
-        <p>Confusion Matrix</p>
+      <div style="background: var(--bg-surface-elev); border-radius: var(--radius-sm); overflow: hidden; padding: 0.5rem; text-align: center; border: 1px solid var(--border-subtle);">
+        <img src="/plots/confusion_matrix.png" alt="Confusion Matrix Plot" style="width: 100%; border-radius: var(--radius-xs);" loading="lazy">
+        <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; display: block; font-weight: 600;">Confusion Matrix Plot</span>
       </div>
     </div>
   </div>
+
 </div>
 
 {% endif %}
@@ -205,30 +240,105 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 {% if ready %}
-// Doughnut chart
-const ctx = document.getElementById('demandChart').getContext('2d');
-new Chart(ctx, {
+// Global Chart.js Styling Defaults for Dark Theme
+Chart.defaults.color = '#9CA3AF';
+Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+Chart.defaults.font.family = 'Inter, sans-serif';
+
+// 1. Demand Distribution Doughnut Chart
+const ctxDoughnut = document.getElementById('demandDoughnutChart').getContext('2d');
+new Chart(ctxDoughnut, {
   type: 'doughnut',
   data: {
-    labels: ['HIGH', 'MEDIUM', 'LOW'],
+    labels: ['HIGH Demand', 'MEDIUM Demand', 'LOW Demand'],
     datasets: [{
       data: [{{ high_demand }}, {{ medium_demand }}, {{ low_demand }}],
-      backgroundColor: ['#EF4444','#F59E0B','#10B981'],
-      borderColor: ['#1a1a2e'],
+      backgroundColor: ['#EF4444', '#F59E0B', '#10B981'],
+      borderColor: '#0D1126',
       borderWidth: 3,
-      hoverOffset: 10
+      hoverOffset: 8
     }]
   },
   options: {
     responsive: true,
-    cutout: '68%',
+    maintainAspectRatio: false,
+    cutout: '72%',
     plugins: {
-      legend: { display: false },
+      legend: {
+        position: 'bottom',
+        labels: { boxWidth: 12, padding: 18, color: '#F3F4F6', font: { size: 12, weight: '600' } }
+      },
       tooltip: {
         callbacks: {
-          label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${(ctx.raw/{{ total_courses }}*100).toFixed(1)}%)`
+          label: function(context) {
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const val = context.raw;
+            const pct = ((val / total) * 100).toFixed(1);
+            return `${context.label}: ${val} courses (${pct}%)`;
+          }
         }
       }
+    }
+  }
+});
+
+// 2. Course Popularity Spectrum Chart
+const popData = {{ pop_dist | tojson }};
+const popLabels = Object.keys(popData);
+const popValues = Object.values(popData);
+
+const ctxPop = document.getElementById('popularityChart').getContext('2d');
+new Chart(ctxPop, {
+  type: 'bar',
+  data: {
+    labels: popLabels.map(l => 'Score ' + l),
+    datasets: [{
+      label: 'Courses',
+      data: popValues,
+      backgroundColor: 'rgba(0, 240, 255, 0.65)',
+      borderColor: '#00F0FF',
+      borderWidth: 1,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 3. Department Resource Demand Chart
+const deptData = {{ dept_demand | tojson }};
+const depts = Object.keys(deptData);
+const highByDept = depts.map(d => deptData[d]['HIGH'] || 0);
+const medByDept = depts.map(d => deptData[d]['MEDIUM'] || 0);
+const lowByDept = depts.map(d => deptData[d]['LOW'] || 0);
+
+const ctxDept = document.getElementById('departmentChart').getContext('2d');
+new Chart(ctxDept, {
+  type: 'bar',
+  data: {
+    labels: depts,
+    datasets: [
+      { label: 'HIGH Demand', data: highByDept, backgroundColor: '#EF4444', borderRadius: 4 },
+      { label: 'MEDIUM Demand', data: medByDept, backgroundColor: '#F59E0B', borderRadius: 4 },
+      { label: 'LOW Demand', data: lowByDept, backgroundColor: '#10B981', borderRadius: 4 }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', labels: { boxWidth: 12, color: '#F3F4F6', font: { weight: '600' } } }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
     }
   }
 });
