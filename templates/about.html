@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}About — GUB Academic AI{% endblock %}
+{% block page_title %}About This Project{% endblock %}
+
+{% block content %}
+
+<!-- ── Project Overview ───────────────────────────────────────────────── -->
+<div class="about-hero animate-in">
+  <div class="about-hero-icon"><i class="bi bi-mortarboard-fill"></i></div>
+  <div class="about-hero-content">
+    <div class="about-badge">Prototype System</div>
+    <h1 class="about-title">GUB Academic AI</h1>
+    <h2 class="about-subtitle">Academic Resource Demand Prediction & Planning System</h2>
+    <p class="about-desc">
+      A machine learning prototype designed to help Green University of Bangladesh (GUB)
+      anticipate academic resource demands — supporting smarter planning for classrooms,
+      lab facilities, sections, and instructors.
+    </p>
+  </div>
+</div>
+
+<!-- ── Important Disclaimer ──────────────────────────────────────────── -->
+<div class="card card-warning animate-in" style="--delay:0.05s">
+  <div class="card-header">
+    <i class="bi bi-exclamation-triangle-fill text-yellow"></i>
+    <h3>Dataset Disclaimer</h3>
+  </div>
+  <div class="card-body">
+    <p>
+      <strong>This application uses a completely synthetic, representative dataset.</strong>
+      The data was programmatically generated to simulate realistic academic patterns
+      (enrollment trends, course popularity, resource usage, etc.) and does
+      <strong>NOT</strong> contain any real, confidential, or official Green University
+      of Bangladesh institutional data. No student names, IDs, phone numbers, or
+      personally identifiable information are present anywhere in this system.
+    </p>
+    <p>
+      The dataset is intended solely as a demonstration of the machine learning
+      methodology. Any resemblance to actual course or institutional data is coincidental.
+    </p>
+  </div>
+</div>
+
+<!-- ── Objectives ────────────────────────────────────────────────────── -->
+<div class="card animate-in" style="--delay:0.1s">
+  <div class="card-header">
+    <i class="bi bi-bullseye text-purple"></i>
+    <h3>Project Objectives</h3>
+  </div>
+  <div class="card-body">
+    <div class="objectives-grid">
+      <div class="obj-item">
+        <div class="obj-icon"><i class="bi bi-1-circle-fill"></i></div>
+        <p>Predict academic resource demand (LOW/MEDIUM/HIGH) using multi-class ML classification.</p>
+      </div>
+      <div class="obj-item">
+        <div class="obj-icon"><i class="bi bi-2-circle-fill"></i></div>
+        <p>Provide data-driven recommendations for section planning, room allocation, and lab scheduling.</p>
+      </div>
+      <div class="obj-item">
+        <div class="obj-icon"><i class="bi bi-3-circle-fill"></i></div>
+        <p>Compare multiple ML algorithms and automatically select the best performer.</p>
+      </div>
+      <div class="obj-item">
+        <div class="obj-icon"><i class="bi bi-4-circle-fill"></i></div>
+        <p>Demonstrate a complete end-to-end ML pipeline suitable for university academic planning.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ML Methodology ─────────────────────────────────────────────────── -->
+<div class="card animate-in" style="--delay:0.15s">
+  <div class="card-header">
+    <i class="bi bi-cpu-fill text-teal"></i>
+    <h3>ML Methodology</h3>
+  </div>
+  <div class="card-body">
+    <div class="pipeline-steps">
+      <div class="pipe-step">
+        <div class="pipe-num">01</div>
+        <div class="pipe-detail">
+          <strong>Dataset Generation</strong>
+          <p>5,000 synthetic records with 16 features engineered for logical consistency.</p>
+        </div>
+      </div>
+      <div class="pipe-arrow"><i class="bi bi-arrow-down"></i></div>
+      <div class="pipe-step">
+        <div class="pipe-num">02</div>
+        <div class="pipe-detail">
+          <strong>Preprocessing</strong>
+          <p>LabelEncoding for categoricals; StandardScaler for numeric features; stratified train/test split (80/20).</p>
+        </div>
+      </div>
+      <div class="pipe-arrow"><i class="bi bi-arrow-down"></i></div>
+      <div class="pipe-step">
+        <div class="pipe-num">03</div>
+        <div class="pipe-detail">
+          <strong>Model Training</strong>
+          <p>Six algorithms trained: Logistic Regression, KNN, Naive Bayes, Decision Tree, Random Forest, SVM.</p>
+        </div>
+      </div>
+      <div class="pipe-arrow"><i class="bi bi-arrow-down"></i></div>
+      <div class="pipe-step">
+        <div class="pipe-num">04</div>
+        <div class="pipe-detail">
+          <strong>Evaluation & Selection</strong>
+          <p>Evaluated by Accuracy, Precision, Recall, F1-Score, and Confusion Matrix. Best model selected by weighted F1.</p>
+        </div>
+      </div>
+      <div class="pipe-arrow"><i class="bi bi-arrow-down"></i></div>
+      <div class="pipe-step">
+        <div class="pipe-num">05</div>
+        <div class="pipe-detail">
+          <strong>Deployment & Inference</strong>
+          <p>Best model + preprocessors saved with Joblib, served via Flask web application.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Algorithms & Metrics ───────────────────────────────────────────── -->
+<div class="row-2col">
+  <div class="card animate-in" style="--delay:0.2s">
+    <div class="card-header">
+      <i class="bi bi-list-check text-blue"></i>
+      <h3>Algorithms Used</h3>
+    </div>
+    <div class="card-body">
+      <ul class="algo-list">
+        <li><i class="bi bi-arrow-right-circle-fill text-blue"></i> Logistic Regression</li>
+        <li><i class="bi bi-arrow-right-circle-fill text-purple"></i> K-Nearest Neighbors (KNN)</li>
+        <li><i class="bi bi-arrow-right-circle-fill text-teal"></i> Gaussian Naive Bayes</li>
+        <li><i class="bi bi-arrow-right-circle-fill text-gold"></i> Decision Tree</li>
+        <li><i class="bi bi-arrow-right-circle-fill text-green"></i> Random Forest</li>
+        <li><i class="bi bi-arrow-right-circle-fill text-red"></i> Support Vector Machine (SVM)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card animate-in" style="--delay:0.25s">
+    <div class="card-header">
+      <i class="bi bi-graph-up text-gold"></i>
+      <h3>Evaluation Metrics</h3>
+    </div>
+    <div class="card-body">
+      <ul class="algo-list">
+        <li><i class="bi bi-check2-all text-green"></i> <strong>Accuracy</strong> — overall correct predictions</li>
+        <li><i class="bi bi-check2-all text-green"></i> <strong>Precision</strong> — correct positive rate</li>
+        <li><i class="bi bi-check2-all text-green"></i> <strong>Recall</strong> — true positive capture rate</li>
+        <li><i class="bi bi-check2-all text-green"></i> <strong>F1-Score</strong> — harmonic mean of P & R</li>
+        <li><i class="bi bi-check2-all text-green"></i> <strong>Confusion Matrix</strong> — per-class breakdown</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ── Features Used ──────────────────────────────────────────────────── -->
+<div class="card animate-in" style="--delay:0.3s">
+  <div class="card-header">
+    <i class="bi bi-sliders text-purple"></i>
+    <h3>Input Features (16)</h3>
+  </div>
+  <div class="card-body">
+    <div class="features-grid">
+      {% set features = [
+        ("department","Category","Academic department"),
+        ("course_type","Category","Theory / Lab / Theory+Lab / Seminar"),
+        ("credit","Integer","Credit hours (1–4)"),
+        ("semester","Category","Spring / Summer / Fall"),
+        ("previous_enrollment","Integer","Number of students in last offering"),
+        ("previous_sections","Integer","Number of sections last time"),
+        ("previous_pass_rate","Float","% of students who passed"),
+        ("course_popularity","Integer","Popularity score 1–10"),
+        ("lab_required","Binary","1 = lab needed, 0 = no lab"),
+        ("lab_capacity","Integer","Max lab seats (0 if no lab)"),
+        ("room_capacity","Integer","Classroom seating capacity"),
+        ("instructor_count","Integer","Number of instructors assigned"),
+        ("class_duration","Integer","Duration in minutes"),
+        ("previous_resource_usage","Float","Historical resource utilisation score (0–100)"),
+        ("registration_growth_rate","Float","% change in registrations vs prior semester"),
+      ] %}
+      {% for name, dtype, desc in features %}
+      <div class="feature-item">
+        <div class="feature-name"><code>{{ name }}</code></div>
+        <div class="feature-type">{{ dtype }}</div>
+        <div class="feature-desc">{{ desc }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ── Limitations & Future ───────────────────────────────────────────── -->
+<div class="row-2col">
+  <div class="card card-warning animate-in" style="--delay:0.35s">
+    <div class="card-header">
+      <i class="bi bi-exclamation-circle-fill text-yellow"></i>
+      <h3>Current Limitations</h3>
+    </div>
+    <div class="card-body">
+      <ul class="limit-list">
+        <li>Dataset is <strong>synthetic</strong>; results may differ with real GUB data.</li>
+        <li>No temporal/time-series modelling (semester sequence not exploited).</li>
+        <li>Hyperparameters are not exhaustively tuned (no GridSearchCV).</li>
+        <li>No cross-validation (single train/test split used).</li>
+        <li>Recommendation engine is rule-based, not a learned model.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card animate-in" style="--delay:0.4s">
+    <div class="card-header">
+      <i class="bi bi-rocket-takeoff-fill text-teal"></i>
+      <h3>Future Improvements</h3>
+    </div>
+    <div class="card-body">
+      <ul class="limit-list">
+        <li>Integrate actual GUB institutional data (with proper consent).</li>
+        <li>Add cross-validation and hyperparameter tuning (GridSearchCV).</li>
+        <li>Deploy SHAP/LIME explainability for per-prediction feature importance.</li>
+        <li>Implement time-series forecasting for multi-semester planning.</li>
+        <li>Build admin panel for uploading new data and re-training.</li>
+        <li>Add export-to-PDF/CSV for planning reports.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tech Stack ─────────────────────────────────────────────────────── -->
+<div class="card animate-in" style="--delay:0.45s">
+  <div class="card-header">
+    <i class="bi bi-stack text-blue"></i>
+    <h3>Technology Stack</h3>
+  </div>
+  <div class="card-body">
+    <div class="tech-badges">
+      <span class="tech-badge badge-python">Python 3.x</span>
+      <span class="tech-badge badge-flask">Flask</span>
+      <span class="tech-badge badge-sklearn">Scikit-learn</span>
+      <span class="tech-badge badge-pandas">Pandas</span>
+      <span class="tech-badge badge-numpy">NumPy</span>
+      <span class="tech-badge badge-matplotlib">Matplotlib</span>
+      <span class="tech-badge badge-seaborn">Seaborn</span>
+      <span class="tech-badge badge-joblib">Joblib</span>
+      <span class="tech-badge badge-html">HTML5</span>
+      <span class="tech-badge badge-css">CSS3</span>
+      <span class="tech-badge badge-js">JavaScript</span>
+      <span class="tech-badge badge-chartjs">Chart.js</span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

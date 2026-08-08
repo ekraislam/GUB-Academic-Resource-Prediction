@@ -1,0 +1,78 @@
+{
+  "best_model_name": "Logistic Regression",
+  "best_model_metrics": {
+    "accuracy": 0.866,
+    "precision": 0.8636,
+    "recall": 0.866,
+    "f1_score": 0.8638
+  },
+  "all_model_results": {
+    "Logistic Regression": {
+      "accuracy": 0.866,
+      "precision": 0.8636,
+      "recall": 0.866,
+      "f1_score": 0.8638
+    },
+    "K-Nearest Neighbors": {
+      "accuracy": 0.824,
+      "precision": 0.8202,
+      "recall": 0.824,
+      "f1_score": 0.8099
+    },
+    "Naive Bayes": {
+      "accuracy": 0.788,
+      "precision": 0.7952,
+      "recall": 0.788,
+      "f1_score": 0.7909
+    },
+    "Decision Tree": {
+      "accuracy": 0.813,
+      "precision": 0.808,
+      "recall": 0.813,
+      "f1_score": 0.8098
+    },
+    "Random Forest": {
+      "accuracy": 0.842,
+      "precision": 0.8367,
+      "recall": 0.842,
+      "f1_score": 0.834
+    },
+    "SVM": {
+      "accuracy": 0.856,
+      "precision": 0.8525,
+      "recall": 0.856,
+      "f1_score": 0.8508
+    }
+  },
+  "features": [
+    "department",
+    "course_type",
+    "credit",
+    "semester",
+    "previous_enrollment",
+    "previous_sections",
+    "previous_pass_rate",
+    "course_popularity",
+    "lab_required",
+    "lab_capacity",
+    "room_capacity",
+    "instructor_count",
+    "class_duration",
+    "previous_resource_usage",
+    "registration_growth_rate"
+  ],
+  "label_names": [
+    "HIGH",
+    "LOW",
+    "MEDIUM"
+  ],
+  "dataset_shape": [
+    5000,
+    17
+  ],
+  "demand_counts": {
+    "MEDIUM": 3672,
+    "LOW": 865,
+    "HIGH": 463
+  }
+}

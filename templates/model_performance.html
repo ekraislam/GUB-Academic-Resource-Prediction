@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Model Performance — GUB Academic AI{% endblock %}
+{% block page_title %}Model Performance{% endblock %}
+
+{% block content %}
+
+{% if not ready %}
+<div class="empty-state">
+  <div class="empty-icon"><i class="bi bi-bar-chart-fill"></i></div>
+  <h2>No Model Data Available</h2>
+  <p>Please run the training pipeline to generate model performance data.</p>
+  <div class="code-snippet"><code>python train_model.py</code></div>
+</div>
+{% else %}
+
+<!-- ── Best Model Highlight ───────────────────────────────────────────── -->
+<div class="best-model-hero animate-in">
+  <div class="best-icon"><i class="bi bi-trophy-fill"></i></div>
+  <div class="best-details">
+    <div class="best-label">Best Performing Model</div>
+    <div class="best-name">{{ best_model }}</div>
+    <div class="best-metrics-row">
+      <span class="bm-chip">Accuracy <strong>{{ "%.4f"|format(best_metrics.accuracy) }}</strong></span>
+      <span class="bm-chip">Precision <strong>{{ "%.4f"|format(best_metrics.precision) }}</strong></span>
+      <span class="bm-chip">Recall <strong>{{ "%.4f"|format(best_metrics.recall) }}</strong></span>
+      <span class="bm-chip bm-chip-gold">F1-Score <strong>{{ "%.4f"|format(best_metrics.f1_score) }}</strong></span>
+    </div>
+    <p class="best-note">Selected automatically by highest weighted F1-score on 20% hold-out test set.</p>
+  </div>
+</div>
+
+<!-- ── Metrics Table ──────────────────────────────────────────────────── -->
+<div class="card animate-in" style="--delay:0.05s">
+  <div class="card-header">
+    <i class="bi bi-table text-blue"></i>
+    <h3>All Model Metrics</h3>
+  </div>
+  <div class="card-body p0">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Model</th>
+            <th>
+              <span class="th-sort">Accuracy</span>
+              <div class="th-bar-header">
+                <div class="th-bar" style="background:#6C63FF"></div>
+              </div>
+            </th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>
+              <span class="th-sort">F1-Score</span>
+              <span class="th-badge">Selection Metric</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in sorted_models %}
+          {% set name = item[0] %}
+          {% set metrics = item[1] %}
+          <tr {% if name == best_model %}class="row-best"{% endif %}>
+            <td>
+              {% if loop.index == 1 %}
+                <span class="rank-badge rank-gold">#1</span>
+              {% elif loop.index == 2 %}
+                <span class="rank-badge rank-silver">#2</span>
+              {% elif loop.index == 3 %}
+                <span class="rank-badge rank-bronze">#3</span>
+              {% else %}
+                <span class="rank-badge">#{{ loop.index }}</span>
+              {% endif %}
+            </td>
+            <td class="model-name-cell">
+              {% if name == best_model %}<i class="bi bi-trophy-fill text-gold"></i>{% endif %}
+              {{ name }}
+            </td>
+            <td>
+              <div class="metric-bar-cell">
+                <div class="metric-inline-bar">
+                  <div style="width:{{ (metrics.accuracy*100)|round }}%;background:#6C63FF"></div>
+                </div>
+                <span>{{ "%.4f"|format(metrics.accuracy) }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-cell">
+                <div class="metric-inline-bar">
+                  <div style="width:{{ (metrics.precision*100)|round }}%;background:#43B89C"></div>
+                </div>
+                <span>{{ "%.4f"|format(metrics.precision) }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-cell">
+                <div class="metric-inline-bar">
+                  <div style="width:{{ (metrics.recall*100)|round }}%;background:#F7B731"></div>
+                </div>
+                <span>{{ "%.4f"|format(metrics.recall) }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-cell">
+                <div class="metric-inline-bar">
+                  <div style="width:{{ (metrics.f1_score*100)|round }}%;background:#EF4444"></div>
+                </div>
+                <strong class="{% if name == best_model %}text-gold{% endif %}">
+                  {{ "%.4f"|format(metrics.f1_score) }}
+                </strong>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── Radar Chart ────────────────────────────────────────────────────── -->
+<div class="row-2col">
+  <div class="card animate-in" style="--delay:0.1s">
+    <div class="card-header">
+      <i class="bi bi-bar-chart-fill text-purple"></i>
+      <h3>F1-Score Comparison</h3>
+    </div>
+    <div class="card-body chart-card-body">
+      <canvas id="f1Chart" height="300"></canvas>
+    </div>
+  </div>
+
+  <div class="card animate-in" style="--delay:0.15s">
+    <div class="card-header">
+      <i class="bi bi-activity text-teal"></i>
+      <h3>Accuracy Comparison</h3>
+    </div>
+    <div class="card-body chart-card-body">
+      <canvas id="accChart" height="300"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ── Plot Images ────────────────────────────────────────────────────── -->
+<div class="card animate-in" style="--delay:0.2s">
+  <div class="card-header">
+    <i class="bi bi-images text-blue"></i>
+    <h3>Generated Model Plots</h3>
+  </div>
+  <div class="card-body">
+    <div class="plot-gallery plot-gallery-lg">
+      <div class="plot-item">
+        <img src="/plots/model_comparison.png" alt="Model Comparison"
+             onerror="this.parentElement.style.display='none'" loading="lazy">
+        <p>Model Accuracy & F1 Comparison</p>
+      </div>
+      <div class="plot-item">
+        <img src="/plots/confusion_matrix.png" alt="Confusion Matrix"
+             onerror="this.parentElement.style.display='none'" loading="lazy">
+        <p>Confusion Matrix — {{ best_model }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Evaluation Methodology ────────────────────────────────────────── -->
+<div class="card card-info animate-in" style="--delay:0.25s">
+  <div class="card-header">
+    <i class="bi bi-info-circle-fill text-blue"></i>
+    <h3>Evaluation Methodology</h3>
+  </div>
+  <div class="card-body">
+    <div class="info-grid">
+      <div class="info-item">
+        <h4><i class="bi bi-scissors"></i> Train/Test Split</h4>
+        <p>80% training / 20% test with stratified sampling to maintain class balance.</p>
+      </div>
+      <div class="info-item">
+        <h4><i class="bi bi-bullseye"></i> Selection Criterion</h4>
+        <p>Best model selected by highest <strong>weighted F1-score</strong>, which balances precision and recall across all three demand classes.</p>
+      </div>
+      <div class="info-item">
+        <h4><i class="bi bi-lock-fill"></i> Reproducibility</h4>
+        <p>All models use <code>random_state=42</code> for reproducible results.</p>
+      </div>
+      <div class="info-item">
+        <h4><i class="bi bi-arrow-repeat"></i> Preprocessing</h4>
+        <p>Categorical encoding (LabelEncoder) and feature scaling (StandardScaler) applied to all models consistently.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+{% if ready %}
+const modelNames = {{ all_results.keys() | list | tojson }};
+const f1Scores   = {{ all_results.values() | map(attribute='f1_score') | list | tojson }};
+const accScores  = {{ all_results.values() | map(attribute='accuracy') | list | tojson }};
+
+// F1 bar chart
+new Chart(document.getElementById('f1Chart'), {
+  type: 'bar',
+  data: {
+    labels: modelNames,
+    datasets: [{
+      label: 'F1-Score',
+      data: f1Scores,
+      backgroundColor: modelNames.map((n, i) =>
+        n === '{{ best_model }}' ? '#F7B731' : '#6C63FF88'),
+      borderColor: '#1a1a2e',
+      borderWidth: 0,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { min: 0, max: 1, ticks: { color: '#9ca3af' }, grid: { color: '#ffffff10' } },
+      y: { ticks: { color: '#e2e8f0' }, grid: { display: false } }
+    }
+  }
+});
+
+// Accuracy bar chart
+new Chart(document.getElementById('accChart'), {
+  type: 'bar',
+  data: {
+    labels: modelNames,
+    datasets: [{
+      label: 'Accuracy',
+      data: accScores,
+      backgroundColor: modelNames.map((n, i) =>
+        n === '{{ best_model }}' ? '#43B89C' : '#43B89C55'),
+      borderColor: '#1a1a2e',
+      borderWidth: 0,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { min: 0, max: 1, ticks: { color: '#9ca3af' }, grid: { color: '#ffffff10' } },
+      y: { ticks: { color: '#e2e8f0' }, grid: { display: false } }
+    }
+  }
+});
+{% endif %}
+</script>
+{% endblock %}

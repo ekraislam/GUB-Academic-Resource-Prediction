@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Demand — GUB Academic AI{% endblock %}
+{% block page_title %}Predict Resource Demand{% endblock %}
+
+{% block content %}
+
+<div class="page-intro animate-in">
+  <div class="page-intro-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+  <div>
+    <h2 class="page-intro-title">Academic Resource Demand Prediction</h2>
+    <p class="page-intro-sub">Enter course details below to predict the resource demand level using the trained ML model.</p>
+  </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger animate-in">
+  <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+</div>
+{% endif %}
+
+<form method="POST" action="{{ url_for('predict') }}" id="predictionForm" novalidate>
+
+  <!-- ── Section 1: Course Identity ───────────────────────────────────── -->
+  <div class="card animate-in" style="--delay:0.05s">
+    <div class="card-header">
+      <i class="bi bi-book-fill text-blue"></i>
+      <h3>Course Information</h3>
+    </div>
+    <div class="card-body">
+      <div class="form-grid form-grid-3">
+
+        <div class="form-group">
+          <label for="department">Department <span class="req">*</span></label>
+          <select id="department" name="department" class="form-control" required>
+            {% for dept in departments %}
+            <option value="{{ dept }}">{{ dept }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="course_code">Course Code</label>
+          <input type="text" id="course_code" name="course_code" class="form-control"
+                 placeholder="e.g. CSE301" maxlength="10">
+        </div>
+
+        <div class="form-group">
+          <label for="course_type">Course Type <span class="req">*</span></label>
+          <select id="course_type" name="course_type" class="form-control" required>
+            {% for ct in course_types %}
+            <option value="{{ ct }}">{{ ct }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="credit">Credit Hours <span class="req">*</span></label>
+          <select id="credit" name="credit" class="form-control" required>
+            <option value="1">1 Credit</option>
+            <option value="2">2 Credits</option>
+            <option value="3" selected>3 Credits</option>
+            <option value="4">4 Credits</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="semester">Semester <span class="req">*</span></label>
+          <select id="semester" name="semester" class="form-control" required>
+            {% for sem in semesters %}
+            <option value="{{ sem }}">{{ sem }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="class_duration">Class Duration (min) <span class="req">*</span></label>
+          <select id="class_duration" name="class_duration" class="form-control" required>
+            <option value="50">50 min</option>
+            <option value="75">75 min</option>
+            <option value="90" selected>90 min</option>
+            <option value="120">120 min</option>
+            <option value="150">150 min</option>
+            <option value="180">180 min</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 2: Enrollment & Sections ─────────────────────────────── -->
+  <div class="card animate-in" style="--delay:0.1s">
+    <div class="card-header">
+      <i class="bi bi-people-fill text-teal"></i>
+      <h3>Enrollment & Sections</h3>
+    </div>
+    <div class="card-body">
+      <div class="form-grid form-grid-3">
+
+        <div class="form-group">
+          <label for="previous_enrollment">Previous Enrollment <span class="req">*</span></label>
+          <div class="input-with-hint">
+            <input type="number" id="previous_enrollment" name="previous_enrollment"
+                   class="form-control" value="60" min="5" max="300" required>
+            <span class="hint">students</span>
+          </div>
+          <div class="range-row">
+            <span>5</span>
+            <input type="range" id="enrollment_range" min="5" max="300" value="60"
+                   class="range-slider" oninput="syncRange('previous_enrollment','enrollment_range')">
+            <span>300</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="previous_sections">Previous Sections <span class="req">*</span></label>
+          <input type="number" id="previous_sections" name="previous_sections"
+                 class="form-control" value="2" min="1" max="10" required>
+        </div>
+
+        <div class="form-group">
+          <label for="previous_pass_rate">Previous Pass Rate (%) <span class="req">*</span></label>
+          <div class="input-with-hint">
+            <input type="number" id="previous_pass_rate" name="previous_pass_rate"
+                   class="form-control" value="75" min="0" max="100" step="0.1" required>
+            <span class="hint">%</span>
+          </div>
+          <div class="range-row">
+            <span>0</span>
+            <input type="range" id="pass_range" min="0" max="100" value="75"
+                   class="range-slider" oninput="syncRange('previous_pass_rate','pass_range')">
+            <span>100</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="registration_growth_rate">Registration Growth Rate (%) <span class="req">*</span></label>
+          <div class="input-with-hint">
+            <input type="number" id="registration_growth_rate" name="registration_growth_rate"
+                   class="form-control" value="5" min="-20" max="45" step="0.1" required>
+            <span class="hint">%</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="instructor_count">Number of Instructors <span class="req">*</span></label>
+          <input type="number" id="instructor_count" name="instructor_count"
+                 class="form-control" value="2" min="1" max="10" required>
+        </div>
+
+        <div class="form-group">
+          <label for="course_popularity">Course Popularity (1–10) <span class="req">*</span></label>
+          <div class="star-rating-wrapper">
+            <input type="number" id="course_popularity" name="course_popularity"
+                   class="form-control" value="5" min="1" max="10" required>
+          </div>
+          <div class="popularity-bar-container">
+            <div class="popularity-bar" id="popularityBar" style="width:50%"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 3: Resources & Facilities ────────────────────────────── -->
+  <div class="card animate-in" style="--delay:0.15s">
+    <div class="card-header">
+      <i class="bi bi-buildings-fill text-purple"></i>
+      <h3>Resources & Facilities</h3>
+    </div>
+    <div class="card-body">
+      <div class="form-grid form-grid-3">
+
+        <div class="form-group">
+          <label for="lab_required">Lab Required <span class="req">*</span></label>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn active" id="lab_no_btn" onclick="setLab(0)">No Lab</button>
+            <button type="button" class="toggle-btn" id="lab_yes_btn" onclick="setLab(1)">Lab Required</button>
+            <input type="hidden" id="lab_required" name="lab_required" value="0">
+          </div>
+        </div>
+
+        <div class="form-group" id="lab_cap_group">
+          <label for="lab_capacity">Lab Capacity <span class="req">*</span></label>
+          <select id="lab_capacity" name="lab_capacity" class="form-control">
+            <option value="0">N/A (No Lab)</option>
+            <option value="20">20 seats</option>
+            <option value="25">25 seats</option>
+            <option value="30">30 seats</option>
+            <option value="40">40 seats</option>
+            <option value="50">50 seats</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="room_capacity">Classroom Capacity <span class="req">*</span></label>
+          <div class="input-with-hint">
+            <input type="number" id="room_capacity" name="room_capacity"
+                   class="form-control" value="60" min="20" max="300" required>
+            <span class="hint">seats</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="previous_resource_usage">Previous Resource Usage (0–100) <span class="req">*</span></label>
+          <div class="input-with-hint">
+            <input type="number" id="previous_resource_usage" name="previous_resource_usage"
+                   class="form-control" value="60" min="0" max="100" step="0.1" required>
+            <span class="hint">score</span>
+          </div>
+          <div class="range-row">
+            <span>0</span>
+            <input type="range" id="resource_range" min="0" max="100" value="60"
+                   class="range-slider" oninput="syncRange('previous_resource_usage','resource_range')">
+            <span>100</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Submit ────────────────────────────────────────────────────────── -->
+  <div class="form-actions animate-in" style="--delay:0.2s">
+    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+      <i class="bi bi-lightning-charge-fill"></i>
+      <span>Predict Resource Demand</span>
+      <div class="btn-loader" id="btnLoader"></div>
+    </button>
+    <button type="reset" class="btn btn-outline btn-lg" onclick="resetForm()">
+      <i class="bi bi-arrow-counterclockwise"></i> Reset
+    </button>
+  </div>
+
+</form>
+
+<!-- ── Tips Card ─────────────────────────────────────────────────────── -->
+<div class="card card-tip animate-in" style="--delay:0.25s">
+  <div class="card-header">
+    <i class="bi bi-lightbulb-fill text-gold"></i>
+    <h3>Tips for Accurate Predictions</h3>
+  </div>
+  <div class="card-body tips-list">
+    <div class="tip-item"><i class="bi bi-check2-circle text-green"></i> Enter realistic enrollment figures from previous semesters.</div>
+    <div class="tip-item"><i class="bi bi-check2-circle text-green"></i> A high registration growth rate (>15%) strongly signals high demand.</div>
+    <div class="tip-item"><i class="bi bi-check2-circle text-green"></i> Lab-required courses generally need more resources.</div>
+    <div class="tip-item"><i class="bi bi-check2-circle text-green"></i> Popularity score reflects how in-demand a course is among students.</div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function syncRange(inputId, rangeId) {
+  document.getElementById(inputId).value = document.getElementById(rangeId).value;
+}
+// Also sync when user types in the number input
+document.getElementById('previous_enrollment').addEventListener('input', function() {
+  document.getElementById('enrollment_range').value = this.value;
+});
+document.getElementById('previous_pass_rate').addEventListener('input', function() {
+  document.getElementById('pass_range').value = this.value;
+});
+document.getElementById('previous_resource_usage').addEventListener('input', function() {
+  document.getElementById('resource_range').value = this.value;
+});
+
+// Popularity bar
+document.getElementById('course_popularity').addEventListener('input', function() {
+  const pct = (this.value / 10) * 100;
+  document.getElementById('popularityBar').style.width = pct + '%';
+});
+
+// Lab toggle
+function setLab(val) {
+  document.getElementById('lab_required').value = val;
+  document.getElementById('lab_no_btn').classList.toggle('active', val === 0);
+  document.getElementById('lab_yes_btn').classList.toggle('active', val === 1);
+}
+
+// Form loader
+document.getElementById('predictionForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+});
+
+function resetForm() {
+  document.getElementById('enrollment_range').value = 60;
+  document.getElementById('pass_range').value = 75;
+  document.getElementById('resource_range').value = 60;
+  document.getElementById('popularityBar').style.width = '50%';
+  setLab(0);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — GUB Academic AI{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+{% if not ready %}
+<!-- ── Not Trained State ─────────────────────────────────────────────── -->
+<div class="empty-state">
+  <div class="empty-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+  <h2>Model Not Trained Yet</h2>
+  <p>Please run the training pipeline first to populate the dashboard.</p>
+  <div class="code-snippet">
+    <code>python generate_dataset.py</code><br>
+    <code>python train_model.py</code>
+  </div>
+</div>
+{% else %}
+
+<!-- ── Hero Banner ───────────────────────────────────────────────────── -->
+<div class="hero-banner">
+  <div class="hero-content">
+    <div class="hero-badge"><i class="bi bi-stars"></i> AI-Powered Planning</div>
+    <h1 class="hero-title">Academic Resource<br>Demand Prediction</h1>
+    <p class="hero-sub">Prototype System for Green University of Bangladesh &mdash; powered by Machine Learning</p>
+    <a href="{{ url_for('predict') }}" class="btn btn-primary btn-hero">
+      <i class="bi bi-lightning-charge-fill"></i> Predict Now
+    </a>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-ring ring-1"></div>
+    <div class="hero-ring ring-2"></div>
+    <div class="hero-ring ring-3"></div>
+    <div class="hero-icon-center"><i class="bi bi-mortarboard-fill"></i></div>
+  </div>
+</div>
+
+<!-- ── KPI Cards ─────────────────────────────────────────────────────── -->
+<div class="kpi-grid">
+  <div class="kpi-card kpi-blue animate-in" style="--delay:0.05s">
+    <div class="kpi-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value counter" data-target="{{ total_courses }}">0</div>
+      <div class="kpi-label">Total Course Records</div>
+    </div>
+  </div>
+  <div class="kpi-card kpi-red animate-in" style="--delay:0.1s">
+    <div class="kpi-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value counter" data-target="{{ high_demand }}">0</div>
+      <div class="kpi-label">High Demand Courses</div>
+    </div>
+  </div>
+  <div class="kpi-card kpi-yellow animate-in" style="--delay:0.15s">
+    <div class="kpi-icon"><i class="bi bi-dash-circle-fill"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value counter" data-target="{{ medium_demand }}">0</div>
+      <div class="kpi-label">Medium Demand</div>
+    </div>
+  </div>
+  <div class="kpi-card kpi-green animate-in" style="--delay:0.2s">
+    <div class="kpi-icon"><i class="bi bi-check-circle-fill"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value counter" data-target="{{ low_demand }}">0</div>
+      <div class="kpi-label">Low Demand</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Best Model Card + Demand Doughnut ─────────────────────────────── -->
+<div class="row-2col">
+
+  <!-- Best Model -->
+  <div class="card animate-in" style="--delay:0.25s">
+    <div class="card-header">
+      <i class="bi bi-trophy-fill text-gold"></i>
+      <h3>Best ML Model</h3>
+    </div>
+    <div class="card-body">
+      <div class="best-model-name">{{ best_model }}</div>
+      <div class="metrics-grid-2">
+        <div class="metric-chip chip-blue">
+          <span class="chip-label">Accuracy</span>
+          <span class="chip-val">{{ best_accuracy }}</span>
+        </div>
+        <div class="metric-chip chip-purple">
+          <span class="chip-label">Precision</span>
+          <span class="chip-val">{{ best_precision }}</span>
+        </div>
+        <div class="metric-chip chip-teal">
+          <span class="chip-label">Recall</span>
+          <span class="chip-val">{{ best_recall }}</span>
+        </div>
+        <div class="metric-chip chip-gold">
+          <span class="chip-label">F1-Score</span>
+          <span class="chip-val">{{ best_f1 }}</span>
+        </div>
+      </div>
+      <a href="{{ url_for('model_performance') }}" class="btn btn-outline btn-sm mt-auto">
+        View All Models <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Demand Distribution Doughnut -->
+  <div class="card animate-in" style="--delay:0.3s">
+    <div class="card-header">
+      <i class="bi bi-pie-chart-fill text-purple"></i>
+      <h3>Demand Distribution</h3>
+    </div>
+    <div class="card-body chart-card-body">
+      <canvas id="demandChart" width="280" height="220"></canvas>
+      <div class="chart-legend">
+        <span class="legend-dot dot-red"></span>HIGH ({{ high_demand }})
+        <span class="legend-dot dot-yellow"></span>MEDIUM ({{ medium_demand }})
+        <span class="legend-dot dot-green"></span>LOW ({{ low_demand }})
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Model Comparison Mini Table ───────────────────────────────────── -->
+<div class="card animate-in" style="--delay:0.35s">
+  <div class="card-header">
+    <i class="bi bi-table text-teal"></i>
+    <h3>Model Performance Summary</h3>
+    <a href="{{ url_for('model_performance') }}" class="btn btn-outline btn-xs ml-auto">Full Report</a>
+  </div>
+  <div class="card-body p0">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Accuracy</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1-Score</th>
+            <th>Rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in sorted_models %}
+          {% set name = item[0] %}
+          {% set metrics = item[1] %}
+          <tr {% if loop.index == 1 %}class="row-best"{% endif %}>
+            <td class="model-name-cell">
+              {% if loop.index == 1 %}<i class="bi bi-trophy-fill text-gold"></i>{% endif %}
+              {{ name }}
+            </td>
+            <td><span class="score-pill">{{ "%.4f"|format(metrics.accuracy) }}</span></td>
+            <td><span class="score-pill">{{ "%.4f"|format(metrics.precision) }}</span></td>
+            <td><span class="score-pill">{{ "%.4f"|format(metrics.recall) }}</span></td>
+            <td><span class="score-pill pill-f1">{{ "%.4f"|format(metrics.f1_score) }}</span></td>
+            <td><span class="rank-badge">#{{ loop.index }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── Visualization Gallery ─────────────────────────────────────────── -->
+<div class="card animate-in" style="--delay:0.4s">
+  <div class="card-header">
+    <i class="bi bi-images text-blue"></i>
+    <h3>Generated Visualizations</h3>
+  </div>
+  <div class="card-body">
+    <div class="plot-gallery">
+      <div class="plot-item">
+        <img src="/plots/demand_distribution.png"
+             onerror="this.parentElement.style.display='none'"
+             alt="Demand Distribution" loading="lazy">
+        <p>Demand Distribution</p>
+      </div>
+      <div class="plot-item">
+        <img src="/plots/enrollment_distribution.png"
+             onerror="this.parentElement.style.display='none'"
+             alt="Enrollment Distribution" loading="lazy">
+        <p>Enrollment Distribution</p>
+      </div>
+      <div class="plot-item">
+        <img src="/plots/model_comparison.png"
+             onerror="this.parentElement.style.display='none'"
+             alt="Model Comparison" loading="lazy">
+        <p>Model Comparison</p>
+      </div>
+      <div class="plot-item">
+        <img src="/plots/confusion_matrix.png"
+             onerror="this.parentElement.style.display='none'"
+             alt="Confusion Matrix" loading="lazy">
+        <p>Confusion Matrix</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+{% if ready %}
+// Doughnut chart
+const ctx = document.getElementById('demandChart').getContext('2d');
+new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: ['HIGH', 'MEDIUM', 'LOW'],
+    datasets: [{
+      data: [{{ high_demand }}, {{ medium_demand }}, {{ low_demand }}],
+      backgroundColor: ['#EF4444','#F59E0B','#10B981'],
+      borderColor: ['#1a1a2e'],
+      borderWidth: 3,
+      hoverOffset: 10
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '68%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${(ctx.raw/{{ total_courses }}*100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+{% endif %}
+</script>
+{% endblock %}

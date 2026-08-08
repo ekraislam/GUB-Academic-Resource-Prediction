@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GUB Academic AI — Academic Resource Demand Prediction & Planning System for Green University of Bangladesh">
+  <title>{% block title %}GUB Academic AI{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i class="bi bi-mortarboard-fill"></i></div>
+        <div class="logo-text">
+          <span class="logo-title">GUB</span>
+          <span class="logo-sub">Academic AI</span>
+        </div>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+        <i class="bi bi-grid-1x2-fill"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('predict') }}" class="nav-link {% if request.endpoint in ['predict','predict_post','result'] %}active{% endif %}">
+        <i class="bi bi-lightning-charge-fill"></i>
+        <span>Predict Demand</span>
+      </a>
+
+      <div class="nav-section-label">Analytics</div>
+      <a href="{{ url_for('model_performance') }}" class="nav-link {% if request.endpoint == 'model_performance' %}active{% endif %}">
+        <i class="bi bi-bar-chart-fill"></i>
+        <span>Model Performance</span>
+      </a>
+
+      <div class="nav-section-label">Info</div>
+      <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>About</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-badge">
+        <i class="bi bi-shield-check"></i>
+        <span>Synthetic Dataset</span>
+      </div>
+      <p class="sidebar-version">v1.0.0 · GUB 2025</p>
+    </div>
+  </aside>
+
+  <!-- ── Overlay (mobile) ───────────────────────────────────────────────── -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ── Main content ───────────────────────────────────────────────────── -->
+  <div class="main-wrapper" id="mainWrapper">
+    <!-- Top bar -->
+    <header class="topbar">
+      <button class="topbar-menu-btn" id="menuBtn" aria-label="Open menu">
+        <i class="bi bi-list"></i>
+      </button>
+      <div class="topbar-title">{% block page_title %}GUB Academic AI{% endblock %}</div>
+      <div class="topbar-right">
+        <span class="topbar-badge"><i class="bi bi-cpu-fill"></i> ML Powered</span>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="page-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="page-footer">
+      <p>GUB Academic AI &copy; 2025 &mdash; Prototype System &mdash; Dataset is <strong>synthetic/representative</strong></p>
+    </footer>
+  </div>
+
+  <!-- Custom JS -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
